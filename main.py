@@ -8,15 +8,15 @@ import numpy as np
 from keras.optimizers import Adam
 from keras.models import load_model
 
-labelPath = '../../NeedleImages/'
-imgPath = '../../NeedleImages/'
+labelPath = '../../NeedleImages/Recategorized/'
+imgPath = '../../NeedleImages/Recategorized/'
 savePath = './save/'
 
-imgDim = (128,128,1)
+imgDim = (256,256,1)
 classNum = 2
 batchSize = 32
 epochsnum = 100
-INIT_LR = 1e-4
+INIT_LR = 3e-4
 
 train_data,train_label,test_data,test_label = read_data(labelPath,imgPath)
 
@@ -31,7 +31,7 @@ train_data,train_label,test_data,test_label = read_data(labelPath,imgPath)
 # args = vars(ap.parse_args())
 
 aug = ImageDataGenerator(rotation_range=10,width_shift_range=0.1,
-        height_shift_range=0.1, shear_range=0, zoom_range=1,
+        height_shift_range=0.1, shear_range=0, zoom_range=0.2,
         horizontal_flip=True, vertical_flip=True)
 
 model = createModel(*imgDim,classNum)

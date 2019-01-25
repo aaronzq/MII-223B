@@ -14,8 +14,8 @@ def normalize(img):
     # Normalize the images in the range of 0 to 1 (converted into float64)
     # 512 x 512
 
-    # return (img-np.min(img))/(np.max(img)-np.min(img))
-    return img / np.max(img)
+    return (img-np.min(img))/(np.max(img)-np.min(img))
+    # return img / np.max(img)
 
 def myPreprocessing(img):
 
@@ -41,8 +41,8 @@ def read_data(labelPath,imgPath):
             label_list.append(1)
             yes+=1
         img = cv2.imread(imgPath+imgName,cv2.IMREAD_GRAYSCALE)
-        img = cv2.resize(img, (128,128))
-        img = cv2.adaptiveThreshold(img, 255 , cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,15,2)
+        img = cv2.resize(img, (256,256))
+        # img = cv2.adaptiveThreshold(img, 255 , cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,15,2)
         img = normalize(img)
         img = img_to_array(img)
         img_list.append(img)
@@ -62,25 +62,71 @@ def read_data(labelPath,imgPath):
     
     return train_data,train_label,test_data,test_label
 
+def save_data_folders(labelPath,imgPath,noNeedle,yesNeedle):
+    #  read the labels from a csv file and read the corresponding images
+    #  save them in different folders
+
+    labelFile = pd.DataFrame(pd.read_csv(labelPath+'Labels.csv'))
+    n,c = labelFile.shape
+    for i in range(n):
+        ind,imgName,labelName = labelFile.loc[i]
+        img = cv2.imread(imgPath+imgName,cv2.IMREAD_GRAYSCALE)
+        if labelName == 'no':            
+            cv2.imwrite(noNeedle+imgName,img)
+        else:
+            cv2.imwrite(yesNeedle+imgName,img)
+
+def create_label_file(No_Needle,Yes_Needle,savePath):
+    from os import listdir
+    from os.path import isfile, join
+        
+    col1 = 'ind' 
+    col2 = 'External ID'
+    col3 = 'Label'
+
+    nd_files = [f for f in listdir(No_Needle) if isfile(join(No_Needle, f))]
+    nd_labels = ['no' for i in range(0,len(nd_files))]
+    yd_files = [f for f in listdir(Yes_Needle) if isfile(join(Yes_Needle, f))]
+    yd_labels = ['yes' for i in range(0,len(yd_files))]
+
+    EID = nd_files + yd_files
+    L = nd_labels + yd_labels
+    
+    df = {}
+    df[col2] = EID
+    df[col3] = L
+
+    csvSAVE = pd.DataFrame(df, columns = [col2,col3])
+    csvSAVE.to_csv(join(savePath,'Labels.csv'))
+
+    
 if __name__ == "__main__":
-    labelPath = '../../NeedleImages/'
-    imgPath = '../../NeedleImages/'
 
-    # train_data,train_label,test_data,test_label = read_data(labelPath,imgPath)
+    labelPath = '../../NeedleImages/Recategorized/'
+    imgPath = '../../NeedleImages/Recategorized/'
+    savePath = '../../NeedleImages/Recategorized/'
+
+    train_data,train_label,test_data,test_label = read_data(labelPath,imgPath)
+    
+    print(train_label[1:10])
+
+
     # pass
-    # print(train_label[1:10])
-    # print(train_label[20])
-
-
-    pass
-    imgName = '14717.jpg'
-    im_test = cv2.imread(imgPath+imgName,cv2.IMREAD_GRAYSCALE)
-    img = cv2.resize(im_test, (256,256))
-    # img = normalize(img)
+    # imgName = '18954.jpg'
+    # im_test = cv2.imread(imgPath+imgName,cv2.IMREAD_GRAYSCALE)
+    # img = cv2.resize(im_test, (256,256))
+    # # img = normalize(img)
     # img = cv2.GaussianBlur(img,(5,5),0)
-    cv2.adaptiveThreshold(img, 255 , cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,15,2)
-    # img = cv2.Canny(img,25,100)
+    # imgbin = cv2.adaptiveThreshold(img, 255 , cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,13,0)
+    # imgedge = cv2.Canny(imgbin,25,100)
 
-    plt.axis('off')
-    plt.imshow(img)
-    plt.show()
+    # plt.axis('off')
+    # plt.figure(1)
+    # plt.imshow(img)
+    # plt.figure(2)
+    # plt.imshow(imgbin)
+    # plt.figure(3)
+    # plt.imshow(imgedge)
+    # plt.show()
+    # ave_data_folders(labelPath,imgPath,noNeedle,yesNeedle)
+    # create_label_file(No_Needle,Yes_Needle,savePath)
