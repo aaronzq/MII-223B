@@ -17,13 +17,73 @@ def normalize(img):
     return (img-np.min(img))/(np.max(img)-np.min(img))
     # return img / np.max(img)
 
-def myPreprocessing(img):
+def rotate(image, angle, center=None, scale=1.0):
+    # grab the dimensions of the image
+    (h, w) = image.shape[:2]
 
-    return []
+    # if the center is None, initialize it as the center of
+    # the image
+    if center is None:
+        center = (w // 2, h // 2)
+
+    # perform the rotation
+    M = cv2.getRotationMatrix2D(center, angle, scale)
+    rotated = cv2.warpAffine(image, M, (w, h))
+
+    # return the rotated image
+    return rotated
+
+def rotate_bound(image, angle):
+    # grab the dimensions of the image and then determine the
+    # center
+    (h, w) = image.shape[:2]
+    (cX, cY) = (w // 2, h // 2)
+
+    # grab the rotation matrix (applying the negative of the
+    # angle to rotate clockwise), then grab the sine and cosine
+    # (i.e., the rotation components of the matrix)
+    M = cv2.getRotationMatrix2D((cX, cY), -angle, 1.0)
+    cos = np.abs(M[0, 0])
+    sin = np.abs(M[0, 1])
+
+    # compute the new bounding dimensions of the image
+    nW = int((h * sin) + (w * cos))
+    nH = int((h * cos) + (w * sin))
+
+    # adjust the rotation matrix to take into account translation
+    M[0, 2] += (nW / 2) - cX
+    M[1, 2] += (nH / 2) - cY
+
+    # perform the actual rotation and return the image
+    return cv2.warpAffine(image, M, (nW, nH))
+
+    
+def myPreprocessing(img,tar_dim):
+    img_pre = cv2.resize(img, (tar_dim[0],tar_dim[1])
+    img_pre = normalize(img_pre)
+    img_pre = img_to_array(img_pre)
+    return img_pre
+
+def load_image_data(img,label,img_list,label_list,yes_cnt,no_cnt,rotatioNum,imgDim):
+    angleInc = 180 // rotationNum
+    for ang in range(0,180,angleInc):
+        imgRot = rotate_bound(img, ang)
+        imgPre = myPreprocessing(imgRot,imgDim)
+        img_list.append(imgPre)
+        if label == 'no':
+            label_list.append(0)
+            no_cnt+=1
+        else:
+            label_list.append(1)
+            yes_cnt+=1
+    return 1
 
 
-def read_data(labelPath,imgPath):
+
+def read_data(labelPath,imgPath,imgDim):
     #  read the labels from a csv file and read the corresponding images
+
+    rotatioNum = 4
 
     labelFile = pd.DataFrame(pd.read_csv(labelPath+'Labels.csv'))
     n,c = labelFile.shape
@@ -34,20 +94,10 @@ def read_data(labelPath,imgPath):
     no=0
     for i in range(n):
         ind,imgName,labelName = labelFile.loc[i]
-        if labelName == 'no':
-            label_list.append(0)
-            no+=1
-        else:
-            label_list.append(1)
-            yes+=1
         img = cv2.imread(imgPath+imgName,cv2.IMREAD_GRAYSCALE)
-        img = cv2.resize(img, (256,256))
-        # img = cv2.adaptiveThreshold(img, 255 , cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,15,2)
-        img = normalize(img)
-        img = img_to_array(img)
-        img_list.append(img)
-        # imgs[i,:,:] = normalize(cv2.imread(imgPath+imgName,cv2.IMREAD_GRAYSCALE))
+        load_image_data(img,labelName,img_list,label_list,yes,no,rotatioNum,imgDim)
 
+    ##### Transform data into network-compatible format
     data = np.array(img_list, dtype='float')
     labels = np.array(label_list)
     (train_data, test_data, train_label, test_label) = train_test_split(data,
@@ -106,7 +156,9 @@ if __name__ == "__main__":
     imgPath = '../../NeedleImages/Recategorized/'
     savePath = '../../NeedleImages/Recategorized/'
 
-    train_data,train_label,test_data,test_label = read_data(labelPath,imgPath)
+    imgDim=(256,256,1)
+
+    train_data,train_label,test_data,test_label = read_data(labelPath,imgPath,imgDim)
     
     print(train_label[1:10])
 
