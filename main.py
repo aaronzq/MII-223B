@@ -18,7 +18,7 @@ batchSize = 32
 epochsnum = 100
 INIT_LR = 3e-4
 
-train_data,train_label,test_data,test_label = read_data(labelPath,imgPath)
+train_data,train_label,test_data,test_label = read_data(labelPath,imgPath,imgDim)
 
 ## construct the argument parse and parse the arguments
 # ap = argparse.ArgumentParser()

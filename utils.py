@@ -59,12 +59,12 @@ def rotate_bound(image, angle):
 
     
 def myPreprocessing(img,tar_dim):
-    img_pre = cv2.resize(img, (tar_dim[0],tar_dim[1])
+    img_pre = cv2.resize(img, (tar_dim[0],tar_dim[1]))
     img_pre = normalize(img_pre)
     img_pre = img_to_array(img_pre)
     return img_pre
 
-def load_image_data(img,label,img_list,label_list,yes_cnt,no_cnt,rotatioNum,imgDim):
+def load_image_data(img,label,img_list,label_list,yes_cnt,no_cnt,rotationNum,imgDim):
     angleInc = 180 // rotationNum
     for ang in range(0,180,angleInc):
         imgRot = rotate_bound(img, ang)
@@ -76,14 +76,14 @@ def load_image_data(img,label,img_list,label_list,yes_cnt,no_cnt,rotatioNum,imgD
         else:
             label_list.append(1)
             yes_cnt+=1
-    return 1
+    return yes_cnt,no_cnt
 
 
 
 def read_data(labelPath,imgPath,imgDim):
     #  read the labels from a csv file and read the corresponding images
 
-    rotatioNum = 4
+    rotationNum = 4
 
     labelFile = pd.DataFrame(pd.read_csv(labelPath+'Labels.csv'))
     n,c = labelFile.shape
@@ -95,7 +95,7 @@ def read_data(labelPath,imgPath,imgDim):
     for i in range(n):
         ind,imgName,labelName = labelFile.loc[i]
         img = cv2.imread(imgPath+imgName,cv2.IMREAD_GRAYSCALE)
-        load_image_data(img,labelName,img_list,label_list,yes,no,rotatioNum,imgDim)
+        yes,no = load_image_data(img,labelName,img_list,label_list,yes,no,rotationNum,imgDim)
 
     ##### Transform data into network-compatible format
     data = np.array(img_list, dtype='float')
@@ -180,5 +180,5 @@ if __name__ == "__main__":
     # plt.figure(3)
     # plt.imshow(imgedge)
     # plt.show()
-    # ave_data_folders(labelPath,imgPath,noNeedle,yesNeedle)
+    # save_data_folders(labelPath,imgPath,noNeedle,yesNeedle)
     # create_label_file(No_Needle,Yes_Needle,savePath)
