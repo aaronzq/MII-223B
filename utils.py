@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split 
 from keras.preprocessing.image import img_to_array
 from keras.utils import to_categorical
+from os import listdir
+from os.path import isfile, join
 
 def load_labelNames():
     
@@ -59,12 +61,16 @@ def rotate_bound(image, angle):
 
     
 def myPreprocessing(img,tar_dim):
+    ## several pre-processing steps
+
     img_pre = cv2.resize(img, (tar_dim[0],tar_dim[1]))
     img_pre = normalize(img_pre)
     img_pre = img_to_array(img_pre)
     return img_pre
 
 def load_image_data(img,label,img_list,label_list,yes_cnt,no_cnt,rotationNum,imgDim):
+    ## augment the data with rotation and expand the labels correspondingly
+
     angleInc = 180 // rotationNum
     for ang in range(0,180,angleInc):
         imgRot = rotate_bound(img, ang)
@@ -77,7 +83,6 @@ def load_image_data(img,label,img_list,label_list,yes_cnt,no_cnt,rotationNum,img
             label_list.append(1)
             yes_cnt+=1
     return yes_cnt,no_cnt
-
 
 
 def read_data(labelPath,imgPath,imgDim):
@@ -112,6 +117,18 @@ def read_data(labelPath,imgPath,imgDim):
     
     return train_data,train_label,test_data,test_label
 
+
+def read_inference_data(imgPath,imgDim):
+    # read the all images under the imgPath and use a trained model to infer
+    files_to_infer = [f for f in listdir(mypath) if isfile(join(imgPath, f))]
+    imgs_to_infer = list()
+    for f in files_to_infer:
+        im = cv2.imread(join(imgPath, f))
+        im = myPreprocessing(im,imgDim)
+        imgs_to_infer.append(im)
+    return np.array(imgs_to_infer)
+
+
 def save_data_folders(labelPath,imgPath,noNeedle,yesNeedle):
     #  read the labels from a csv file and read the corresponding images
     #  save them in different folders
@@ -127,8 +144,6 @@ def save_data_folders(labelPath,imgPath,noNeedle,yesNeedle):
             cv2.imwrite(yesNeedle+imgName,img)
 
 def create_label_file(No_Needle,Yes_Needle,savePath):
-    from os import listdir
-    from os.path import isfile, join
         
     col1 = 'ind' 
     col2 = 'External ID'
