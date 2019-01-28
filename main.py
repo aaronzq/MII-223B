@@ -65,6 +65,13 @@ def infer():
 	imgInfer = read_inference_data(infPath,imgDim)
 	result = model.predict(imgInfer)
 	print(result)
+	for nneed, need in result:
+		if need > nneed:
+			print('Needle!')
+		elif need < nneed:
+			print('No needle!')
+		else:
+			print('Hard to tell')
 
 if __name__ == "__main__":
 	if args['model'] == 'train':
