@@ -27,15 +27,16 @@ epochsnum = 100
 INIT_LR = 3e-4
 
 def train():
-    train_data,train_label,test_data,test_label = read_data(labelPath,imgPath,imgDim)
-    aug = ImageDataGenerator(rotation_range=10,width_shift_range=0.1,
+	train_data,train_label,test_data,test_label = read_data(labelPath,imgPath,imgDim)
+	aug = ImageDataGenerator(rotation_range=10,width_shift_range=0.1,
         height_shift_range=0.1, shear_range=0, zoom_range=0.2,
         horizontal_flip=True, vertical_flip=True)
 
     # model = createModel(*imgDim,classNum)
-    model = createModel_AlexNet(*imgDim,classNum)
+	model = createModel_AlexNet(*imgDim,classNum)
 	# opt = Adam(lr=INIT_LR,decay=INIT_LR / epochsnum)
 	opt = Adam(lr=INIT_LR)
+
 	model.compile(loss='binary_crossentropy',optimizer=opt,metrics=["accuracy"])
 
 	H = model.fit_generator(aug.flow(train_data,train_label,batch_size=batchSize,shuffle=True),
@@ -66,9 +67,9 @@ def infer():
 	print(result)
 
 if __name__ == "__main__":
-    if args[model] == 'train':
-        train()
-    elif args[model] == 'infer':
+	if args['model'] == 'train':
+		train()
+	elif args['model'] == 'infer':
 		infer()
 	else:
 		print('Input correct parameters: train or infer')
