@@ -120,10 +120,10 @@ def read_data(labelPath,imgPath,imgDim):
 
 def read_inference_data(imgPath,imgDim):
     # read the all images under the imgPath and use a trained model to infer
-    files_to_infer = [f for f in listdir(mypath) if isfile(join(imgPath, f))]
+    files_to_infer = [f for f in listdir(imgPath) if isfile(join(imgPath, f))]
     imgs_to_infer = list()
     for f in files_to_infer:
-        im = cv2.imread(join(imgPath, f))
+        im = cv2.imread(join(imgPath, f),cv2.IMREAD_GRAYSCALE)
         im = myPreprocessing(im,imgDim)
         imgs_to_infer.append(im)
     return np.array(imgs_to_infer)
@@ -170,10 +170,12 @@ if __name__ == "__main__":
     labelPath = '../../NeedleImages/Recategorized/'
     imgPath = '../../NeedleImages/Recategorized/'
     savePath = '../../NeedleImages/Recategorized/'
+    infPath = '../../NeedleImages/Recategorized/Inference/'
 
     imgDim=(256,256,1)
 
     train_data,train_label,test_data,test_label = read_data(labelPath,imgPath,imgDim)
+    infer_data = read_inference_data(infPath,imgDim)
     
     print(train_label[1:10])
 

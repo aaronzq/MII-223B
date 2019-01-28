@@ -17,7 +17,7 @@ args = vars(ap.parse_args())
 
 labelPath = '../../NeedleImages/Recategorized/'
 imgPath = '../../NeedleImages/Recategorized/'
-infPath = '../../NeedleImages/Inference/'
+infPath = '../../NeedleImages/Recategorized/Inference/'
 savePath = './save/'
 
 imgDim = (227,227,1)
