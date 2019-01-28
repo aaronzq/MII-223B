@@ -90,7 +90,7 @@ def read_data(labelPath,imgPath,imgDim):
 
     rotationNum = 4
 
-    labelFile = pd.DataFrame(pd.read_csv(labelPath+'Labels.csv'))
+    labelFile = pd.DataFrame(pd.read_csv(labelPath+'Labels_1.csv'))
     n,c = labelFile.shape
     img_list=list()
     label_list=list()
