@@ -88,7 +88,7 @@ def load_image_data(img,label,img_list,label_list,yes_cnt,no_cnt,rotationNum,img
 def read_data(labelPath,imgPath,imgDim):
     #  read the labels from a csv file and read the corresponding images
 
-    rotationNum = 4
+    rotationNum = 6 # 30 degree as a step
 
     labelFile = pd.DataFrame(pd.read_csv(labelPath+'Labels_1.csv'))
     n,c = labelFile.shape

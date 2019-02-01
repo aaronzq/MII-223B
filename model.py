@@ -76,6 +76,26 @@ def createModel_AlexNet(row,col,depth,classes):
 
     return model
 
+
+def createModel_ResNet(row,col,depth,classes):
+	model = Sequential()
+	inputShape = (row, col, depth)
+
+	# if we are using "channels first", update the input shape
+	if K.image_data_format() == "channels_first":
+		inputShape = (depth, height, width)
+	 # print(K.image_data_format())
+	base_model = ResNet50(weights=None, include_top=False, input_shape=inputShape)
+	x = base_model.output
+	x = GlobalAveragePooling2D()(x)
+	x = Dropout(0.7)(x)
+	x = Dense(classes)(x)
+	predictions = Activation('softmax')(x)
+	
+	return Model(inputs=base_model.input,outputs=predictions)
+
+
+
 if __name__ == "__main__":
     # model = createModel(256,256,1,2)
     model = createModel_AlexNet(227,227,1,2)
