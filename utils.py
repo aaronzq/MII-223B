@@ -5,8 +5,9 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split 
 from keras.preprocessing.image import img_to_array
 from keras.utils import to_categorical
-from os import listdir
-from os.path import isfile, join
+from os import listdir, mkdir
+from os.path import isfile, join, isdir
+
 
 def load_labelNames():
     
@@ -128,6 +129,13 @@ def read_inference_data(imgPath,imgDim):
         imgs_to_infer.append(im)
     return np.array(imgs_to_infer)
 
+def exists_or_mkdir(path):
+    # check if the folder exist, if not, create one
+
+    if not isdir(path):
+        mkdir(path)
+
+    return 
 
 def save_data_folders(labelPath,imgPath,noNeedle,yesNeedle):
     #  read the labels from a csv file and read the corresponding images
