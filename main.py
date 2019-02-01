@@ -54,7 +54,7 @@ def train():
 	# fit the data
 	H = model.fit_generator(aug.flow(train_data,train_label,batch_size=batchSize,shuffle=True),
 	validation_data=(test_data,test_label), steps_per_epoch=len(train_data)//batchSize,
-	epochs=epochsnum, verbose=1)
+	epochs=epochsnum, verbose=1, callbacks=callbacks_list)
 
 
 	## Save the model and plot
