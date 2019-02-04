@@ -28,13 +28,13 @@ exists_or_mkdir(checkpointPath)
 imgDim = (227,227,1)
 classNum = 2
 batchSize = 32
-epochsnum = 500
+epochsnum = 200
 INIT_LR = 6e-4
 
 def train():
 	train_data,train_label,test_data,test_label = read_data(labelPath,imgPath,imgDim)
-	aug = ImageDataGenerator(rotation_range=30,width_shift_range=0.25,
-        height_shift_range=0.25, shear_range=0, zoom_range=0.3,
+	aug = ImageDataGenerator(rotation_range=20,width_shift_range=0.1,
+        height_shift_range=0.1, shear_range=0, zoom_range=0.2,
         horizontal_flip=True, vertical_flip=True)
 
     # model = createModel(*imgDim,classNum)

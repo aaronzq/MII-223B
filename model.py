@@ -1,6 +1,8 @@
 from keras.models import Sequential
-from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Dropout, Flatten, BatchNormalization
+from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Dropout, Flatten, BatchNormalization, GlobalAveragePooling2D
 from keras import backend as K
+from keras import Model
+from keras.applications.resnet50 import ResNet50
 
 def createModel(row,col,depth,classes):
     model = Sequential()
