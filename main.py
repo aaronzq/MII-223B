@@ -1,6 +1,6 @@
 from utils import read_data,read_inference_data,exists_or_mkdir
 from keras_preprocessing.image import ImageDataGenerator
-from model import createModel, createModel_AlexNet, createModel_ResNet
+from model import createModel, createModel_AlexNet, createModel_ResNet, createModel_ResNet18
 import argparse
 import os
 import matplotlib.pyplot as plt
@@ -25,7 +25,7 @@ exists_or_mkdir(savePath)
 checkpointPath = './save/checkpoint/'
 exists_or_mkdir(checkpointPath)
 
-imgDim = (227,227,1)
+imgDim = (229,229,1)
 classNum = 2
 batchSize = 32
 epochsnum = 200
@@ -39,7 +39,8 @@ def train():
 
     # model = createModel(*imgDim,classNum)
 	# model = createModel_AlexNet(*imgDim,classNum)
-	model = createModel_ResNet(*imgDim,classNum)
+	# model = createModel_ResNet(*imgDim,classNum)
+	model = createModel_ResNet18(*imgDim,classNum)
 	
 	opt = Adam(lr=INIT_LR,decay=INIT_LR / epochsnum)
 	# opt = Adam(lr=INIT_LR)
