@@ -107,7 +107,7 @@ def read_data(labelPath,imgPath,imgDim):
     data = np.array(img_list, dtype='float')
     labels = np.array(label_list)
     (train_data, test_data, train_label, test_label) = train_test_split(data,
-            labels, test_size=0.1, random_state=42)
+            labels, test_size=0.2, random_state=42)
     # print(train_label[1:10])
     train_label = to_categorical(train_label, num_classes=2)
     # print(train_label[1:10])

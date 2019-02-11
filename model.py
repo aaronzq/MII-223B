@@ -119,12 +119,12 @@ def identity_block(X, f, filters_num, stage, block):
 
     X = Conv2D(filters=F1, kernel_size=(f,f), strides=(1,1), padding='same', 
         name=conv_name_base+'2a', kernel_initializer=glorot_uniform(seed=0))(X)
-    X = BatchNormalization(axis=3, name=bn_name_base+'2a')(X)
+    X = BatchNormalization(axis=-1, name=bn_name_base+'2a')(X)
     X = Activation('relu')(X)
 
     X = Conv2D(filters=F2, kernel_size=(f,f), strides=(1,1), padding='same', 
         name=conv_name_base+'2b', kernel_initializer=glorot_uniform(seed=0))(X)
-    X = BatchNormalization(axis=3, name=bn_name_base+'2b')(X)
+    X = BatchNormalization(axis=-1, name=bn_name_base+'2b')(X)
 
     X = Add()([X, X_shortcut])
     X = Activation('relu')(X)
@@ -132,17 +132,17 @@ def identity_block(X, f, filters_num, stage, block):
     ## Res50 below
     # X = Conv2D(filters=F1, kernel_size=(1,1), strides=(1,1), padding='valid', 
     #     name=conv_name_base+'2a', kernel_initializer=glorot_uniform(seed=0))(X)
-    # X = BatchNormalization(axis=3, name=bn_name_base+'2a')(X)
+    # X = BatchNormalization(axis=-1, name=bn_name_base+'2a')(X)
     # X = Activation('relu')(X)
 
     # X = Conv2D(filters=F2, kernel_size=(f,f), strides=(1,1), padding='same', 
     #     name=conv_name_base+'2b', kernel_initializer=glorot_uniform(seed=0))(X)
-    # X = BatchNormalization(axis=3, name=bn_name_base+'2b')(X)
+    # X = BatchNormalization(axis=-1, name=bn_name_base+'2b')(X)
     # X = Activation('relu')(X)
 
     # X = Conv2D(filters=F3, kernel_size=(1,1), strides=(1,1), padding='valid', 
     #     name=conv_name_base+'2c', kernel_initializer=glorot_uniform(seed=0))(X)
-    # X = BatchNormalization(axis=3, name=bn_name_base+'2c')(X)
+    # X = BatchNormalization(axis=-1, name=bn_name_base+'2c')(X)
 
     # X = Add()([X, X_shortcut])
     # X = Activation('relu')(X)
@@ -172,17 +172,17 @@ def convolutional_block(X, f, filters_num, stage, block, s=2):
 
     X = Conv2D(filters=F1, kernel_size=(f,f), strides=(s,s), padding='valid', 
         name=conv_name_base+'2a', kernel_initializer=glorot_uniform(seed=0))(X)
-    X = BatchNormalization(axis=3, name=bn_name_base+'2a')(X)
+    X = BatchNormalization(axis=-1, name=bn_name_base+'2a')(X)
     X = Activation('relu')(X)
 
     X = Conv2D(filters=F2, kernel_size=(f,f), strides=(1,1), padding='same', 
         name=conv_name_base+'2b', kernel_initializer=glorot_uniform(seed=0))(X)
-    X = BatchNormalization(axis=3, name=bn_name_base+'2b')(X)
+    X = BatchNormalization(axis=-1, name=bn_name_base+'2b')(X)
 
 
     X_shortcut = Conv2D(filters=F2, kernel_size=(f,f), strides=(s,s), padding='valid', 
         name = conv_name_base+'1',kernel_initializer=glorot_uniform(seed=0))(X_shortcut)
-    X_shortcut = BatchNormalization(axis=3, name=bn_name_base+'1')(X_shortcut)
+    X_shortcut = BatchNormalization(axis=-1, name=bn_name_base+'1')(X_shortcut)
 
     X = Add()([X, X_shortcut])
     X = Activation('relu')(X)
@@ -190,22 +190,22 @@ def convolutional_block(X, f, filters_num, stage, block, s=2):
     ## Resnet 50 below
     # X = Conv2D(filters=F1, kernel_size=(1,1), strides=(s,s), padding='valid', 
     #     name=conv_name_base+'2a', kernel_initializer=glorot_uniform(seed=0))(X)
-    # X = BatchNormalization(axis=3, name=bn_name_base+'2a')(X)
+    # X = BatchNormalization(axis=-1, name=bn_name_base+'2a')(X)
     # X = Activation('relu')(X)
 
     # X = Conv2D(filters=F2, kernel_size=(f,f), strides=(1,1), padding='same', 
     #     name=conv_name_base+'2b', kernel_initializer=glorot_uniform(seed=0))(X)
-    # X = BatchNormalization(axis=3, name=bn_name_base+'2b')(X)
+    # X = BatchNormalization(axis=-1, name=bn_name_base+'2b')(X)
     # X = Activation('relu')(X)
 
     # X = Conv2D(filters=F3, kernel_size=(1,1), strides=(1,1), padding='valid', 
     #     name=conv_name_base+'2c', kernel_initializer=glorot_uniform(seed=0))(X)
-    # X = BatchNormalization(axis=3, name=bn_name_base+'2c')(X)
+    # X = BatchNormalization(axis=-1, name=bn_name_base+'2c')(X)
 
 
     # X_shortcut = Conv2D(filter=F3, kernel_size=(1,1), strides=(s,s), padding='valid', 
     #     name = conv_name_base+'1',kernel_initializer=glorot_uniform(seed=0))(X_shortcut)
-    # X_shortcut = BatchNormalization(axis=3, name=bn_name_base+'1')(X_shortcut)
+    # X_shortcut = BatchNormalization(axis=-1, name=bn_name_base+'1')(X_shortcut)
 
     # X = Add()([X, X_shortcut])
     # X = Activation('relu')(X)
@@ -223,7 +223,7 @@ def createModel_ResNet18(row,col,depth,classes):
 
     #Stage 1
     X = Conv2D(filters=64, kernel_size=(7,7), strides=(2,2), name='conv1', kernel_initializer=glorot_uniform(seed=0))(X_input)
-    X = BatchNormalization(axis=3, name='bn_conv1')(X)
+    X = BatchNormalization(axis=-1, name='bn_conv1')(X)
     X = Activation('relu')(X)
     X = MaxPooling2D(pool_size=(3,3),strides=(2,2))(X)
 

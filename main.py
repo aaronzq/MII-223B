@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from keras.optimizers import Adam
 from keras.models import load_model
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, TensorBoard
 
 
 # construct the argument parse and parse the arguments
@@ -24,6 +24,8 @@ savePath = './save/'
 exists_or_mkdir(savePath)
 checkpointPath = './save/checkpoint/'
 exists_or_mkdir(checkpointPath)
+tfbdPath = './save/tensorboard/'
+exists_or_mkdir(tfbdPath)
 
 imgDim = (229,229,1)
 classNum = 2
@@ -45,19 +47,24 @@ def train():
 	opt = Adam(lr=INIT_LR,decay=INIT_LR / epochsnum)
 	# opt = Adam(lr=INIT_LR)
 
-	model.compile(loss='binary_crossentropy',optimizer=opt,metrics=["accuracy"])
+	#model.compile(loss='binary_crossentropy',optimizer=opt,metrics=["accuracy"])
+	model.compile(loss='categorical_crossentropy',optimizer=opt,metrics=["categorical_accuracy"])
+
+
+	tfbd = TensorBoard(log_dir=tfbdPath, histogram_freq=0,write_graph=True, write_images=True)
 
 	# checkpoint
 	ckptName = 'checkpoint.{epoch:02d}-{loss:.2f}-{val_loss:.2f}.model'
-	checkpoint = ModelCheckpoint(checkpointPath+ckptName, monitor='val_loss', verbose=1, save_best_only=True, mode='min', period=20)
-	callbacks_list = [checkpoint]
+	checkpoint = ModelCheckpoint(checkpointPath+ckptName, monitor='val_loss', verbose=1, save_best_only=True, mode='min', period=4)
+	
+	callbacks_list = [checkpoint,tfbd]
 
 	# fit the data
 	H = model.fit_generator(aug.flow(train_data,train_label,batch_size=batchSize,shuffle=True),
 	validation_data=(test_data,test_label), steps_per_epoch=len(train_data)//batchSize,
 	epochs=epochsnum, verbose=1, callbacks=callbacks_list)
 
-
+	#print(H.history)
 	## Save the model and plot
 	model.save(savePath+'needle.model')
 	# plot the training loss and accuracy
@@ -66,8 +73,8 @@ def train():
 	N = epochsnum
 	plt.plot(np.arange(0, N), H.history["loss"], label="train_loss")
 	plt.plot(np.arange(0, N), H.history["val_loss"], label="val_loss")
-	plt.plot(np.arange(0, N), H.history["acc"], label="train_acc")
-	plt.plot(np.arange(0, N), H.history["val_acc"], label="val_acc")
+	plt.plot(np.arange(0, N), H.history["categorical_accuracy"], label="train_acc")
+	plt.plot(np.arange(0, N), H.history["val_categorical_accuracy"], label="val_acc")
 	plt.title("Training Loss and Accuracy on Needle/not Needle")
 	plt.xlabel("Epoch #")
 	plt.ylabel("Loss/Accuracy")
