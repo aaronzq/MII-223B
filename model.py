@@ -17,21 +17,24 @@ def createModel(row,col,depth,classes):
 
     model.add(Conv2D(64,(5,5),padding='same', input_shape=inputShape))
     model.add(Activation('relu'))
-    model.add(Conv2D(32,(5,5)))
+    model.add(Conv2D(64,(5,5),padding='valid',strides=(2,2)))
     model.add(Activation('relu'))
+    model.add(BatchNormalization(axis=-1))
     model.add(MaxPooling2D(pool_size=(2,2)))
     model.add(Dropout(0.2))
 
-    model.add(Conv2D(32,(5,5),padding='same'))
+    model.add(Conv2D(128,(5,5),padding='same'))
     model.add(Activation('relu'))
-    model.add(Conv2D(16,(5,5)))
+    model.add(Conv2D(128,(5,5),padding='valid',strides=(2,2)))
     model.add(Activation('relu'))
+    model.add(BatchNormalization(axis=-1))
     model.add(MaxPooling2D(pool_size=(2,2)))
     model.add(Dropout(0.2))
 
     model.add(Flatten())
-    model.add(Dense(256))
+    model.add(Dense(512))
     model.add(Activation('relu'))
+    model.add(BatchNormalization(axis=-1))
     model.add(Dropout(0.5))
     model.add(Dense(classes))
     model.add(Activation('softmax'))
@@ -259,7 +262,7 @@ def createModel_ResNet18(row,col,depth,classes):
 
 
 if __name__ == "__main__":
-    # model = createModel(256,256,1,2)
+    model = createModel(256,256,3,2)
     # model = createModel_AlexNet(227,227,1,2)
-    model = createModel_ResNet18(229,229,1,2)
+    # model = createModel_ResNet18(229,229,1,2)
     print(model.summary())

@@ -3,6 +3,7 @@ import numpy as np
 import cv2 
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split 
+from skimage.exposure import histogram
 from keras.preprocessing.image import img_to_array
 from keras.utils import to_categorical
 from os import listdir, mkdir
@@ -64,10 +65,27 @@ def rotate_bound(image, angle):
 def myPreprocessing(img,tar_dim):
     ## several pre-processing steps
 
-    img_pre = cv2.resize(img, (tar_dim[0],tar_dim[1]))
-    img_pre = normalize(img_pre)
-    img_pre = img_to_array(img_pre)
-    return img_pre
+    img_ds = cv2.resize(img, (tar_dim[0],tar_dim[1]))
+
+    feature_bin = cv2.GaussianBlur(img_ds,(13,13),0)
+    feature_bin = cv2.adaptiveThreshold(feature_bin, 255 , cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,17,0)
+    feature_edge = cv2.Canny(feature_bin,50,100)
+    feature_edge = np.float32(feature_edge > 125)
+    feature_bin = np.float32(feature_bin)
+
+    img_pre = normalize(img_ds)
+    img_out = np.dstack((img_pre,feature_bin,feature_edge))
+
+    plt.axis('off')
+    plt.figure(1)
+    plt.imshow(img_out[:,:,0])
+    plt.figure(2)
+    plt.imshow(img_out[:,:,1])
+    plt.figure(3)
+    plt.imshow(img_out[:,:,2])
+    plt.show()  
+    img_out = img_to_array(img_out)
+    return img_out
 
 def load_image_data(img,label,img_list,label_list,yes_cnt,no_cnt,rotationNum,imgDim):
     ## augment the data with rotation and expand the labels correspondingly
@@ -89,7 +107,7 @@ def load_image_data(img,label,img_list,label_list,yes_cnt,no_cnt,rotationNum,img
 def read_data(labelPath,imgPath,imgDim):
     #  read the labels from a csv file and read the corresponding images
 
-    rotationNum = 6 # 30 degree as a step
+    rotationNum = 3 # 30 degree as a step
 
     labelFile = pd.DataFrame(pd.read_csv(labelPath+'Labels-update_2_rm_Inference.csv'))
     n,c = labelFile.shape
@@ -180,12 +198,42 @@ if __name__ == "__main__":
     savePath = '../../NeedleImages/Recategorized/'
     infPath = '../../NeedleImages/Recategorized/Inference/'
 
-    imgDim=(256,256,1)
+    imgDim=(256,256,3)
 
     train_data,train_label,test_data,test_label = read_data(labelPath,imgPath,imgDim)
     infer_data = read_inference_data(infPath,imgDim)
     
-    print(train_label[1:10])
+    print(train_label[0:10])
+
+    # test = train_data[8,:,:,0]
+    # hist, hist_centers = histogram(test)
+
+    # test2 = train_data[9,:,:,0]
+    # hist2, hist_centers2 = histogram(test2)
+    # print('++++++')
+    # print(hist)
+    # print('++++++')
+    # print(hist_centers)
+    # testbin = cv2.adaptiveThreshold(test,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,12,3)
+    # testedge = cv2.Canny(testbin)
+
+
+    # plt.axis('off')
+    # plt.figure(1)
+    # plt.imshow(test)
+    # plt.figure(2)
+    # plt.plot(hist_centers,hist,lw=2)
+    # plt.figure(3)
+    # plt.imshow(test2)
+    # plt.figure(4)
+    # plt.plot(hist_centers2,hist2,lw=2)
+    # plt.figure(5)
+    # plt.imshow(testbin)
+    # plt.figure(6)
+    # plt.imshow(testedge)
+    # plt.show()
+
+
 
 
     # pass
@@ -193,8 +241,10 @@ if __name__ == "__main__":
     # im_test = cv2.imread(imgPath+imgName,cv2.IMREAD_GRAYSCALE)
     # img = cv2.resize(im_test, (256,256))
     # # img = normalize(img)
-    # img = cv2.GaussianBlur(img,(5,5),0)
-    # imgbin = cv2.adaptiveThreshold(img, 255 , cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,13,0)
+    # imgh = cv2.GaussianBlur(img,(5,5),1)
+    # imgl = cv2.GaussianBlur(img,(15,15),5)
+    # img = np.abs(imgh-imgl)
+    # imgbin = cv2.adaptiveThreshold(img, 255 , cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,17,0)
     # imgedge = cv2.Canny(imgbin,25,100)
 
     # plt.axis('off')
