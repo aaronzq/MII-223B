@@ -76,14 +76,14 @@ def myPreprocessing(img,tar_dim):
     img_pre = normalize(img_ds)
     img_out = np.dstack((img_pre,feature_bin,feature_edge))
 
-    plt.axis('off')
-    plt.figure(1)
-    plt.imshow(img_out[:,:,0])
-    plt.figure(2)
-    plt.imshow(img_out[:,:,1])
-    plt.figure(3)
-    plt.imshow(img_out[:,:,2])
-    plt.show()  
+    # plt.axis('off')
+    # plt.figure(1)
+    # plt.imshow(img_out[:,:,0])
+    # plt.figure(2)
+    # plt.imshow(img_out[:,:,1])
+    # plt.figure(3)
+    # plt.imshow(img_out[:,:,2])
+    # plt.show()  
     img_out = img_to_array(img_out)
     return img_out
 
