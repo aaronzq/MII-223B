@@ -27,7 +27,7 @@ exists_or_mkdir(checkpointPath)
 tfbdPath = './save/tensorboard/'
 exists_or_mkdir(tfbdPath)
 
-imgDim = (229,229,3)
+imgDim = (256,256,1)
 classNum = 2
 batchSize = 32
 epochsnum = 200
@@ -39,7 +39,7 @@ def train():
         height_shift_range=0.1, shear_range=0, zoom_range=0.2,
         horizontal_flip=True, vertical_flip=True)
 
-    model = createModel(*imgDim,classNum)
+	model = createModel(*imgDim,classNum)
 	# model = createModel_AlexNet(*imgDim,classNum)
 	# model = createModel_ResNet(*imgDim,classNum)
 	# model = createModel_ResNet18(*imgDim,classNum)

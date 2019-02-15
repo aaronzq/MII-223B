@@ -21,6 +21,12 @@ def normalize(img):
     return (img-np.min(img))/(np.max(img)-np.min(img))
     # return img / np.max(img)
 
+def normalize_u8(img):
+    # Normalize the images in the range of 0 to 255 (converted into uint8)
+    # 
+
+    return np.uint8( 255*normalize(img) )    
+
 def rotate(image, angle, center=None, scale=1.0):
     # grab the dimensions of the image
     (h, w) = image.shape[:2]
@@ -64,17 +70,30 @@ def rotate_bound(image, angle):
     
 def myPreprocessing(img,tar_dim):
     ## several pre-processing steps
+    base_r = 0.3
+    kernel = np.ones((6,6),np.uint8)
 
     img_ds = cv2.resize(img, (tar_dim[0],tar_dim[1]))
 
-    feature_bin = cv2.GaussianBlur(img_ds,(13,13),0)
-    feature_bin = cv2.adaptiveThreshold(feature_bin, 255 , cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,17,0)
-    feature_edge = cv2.Canny(feature_bin,50,100)
-    feature_edge = np.float32(feature_edge > 125)
-    feature_bin = np.float32(feature_bin)
+    img_norm_u8 = normalize_u8(img_ds)
+    img_norm_f32 = normalize(img_ds)
 
-    img_pre = normalize(img_ds)
-    img_out = np.dstack((img_pre,feature_bin,feature_edge))
+
+    t, img_bin_base = cv2.threshold(img_norm_u8, round(base_r*255), 255, cv2.THRESH_BINARY)
+    base_mask = np.uint8(img_bin_base > 125)
+
+
+    feature_bin = cv2.GaussianBlur(img_norm_u8*base_mask,(13,13),0)
+    feature_bin = cv2.adaptiveThreshold(feature_bin, 255 , cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,17,0)
+    bin_mask = np.uint8(feature_bin > 125)
+    # opening = cv2.morphologyEx(bin_mask, cv2.MORPH_GRADIENT, kernel)
+    # erosion = cv2.erode(bin_mask,kernel,iterations = 1)
+    
+    # feature_edge = cv2.Canny(feature_bin,50,100)
+    # feature_edge = np.uint8(feature_edge > 125)
+    # feature_bin = np.float32(feature_bin)
+
+    # img_out = np.dstack((img_norm_u8,feature_bin,feature_edge))
 
     # plt.axis('off')
     # plt.figure(1)
@@ -83,8 +102,12 @@ def myPreprocessing(img,tar_dim):
     # plt.imshow(img_out[:,:,1])
     # plt.figure(3)
     # plt.imshow(img_out[:,:,2])
+    # plt.figure(4)
+    # plt.imshow(img_norm_u8*bin_mask)
+    # plt.figure(5)
+    # plt.imshow(img_norm_u8*opening)
     # plt.show()  
-    img_out = img_to_array(img_out)
+    img_out = img_to_array(img_norm_f32 * np.float32(bin_mask))
     return img_out
 
 def load_image_data(img,label,img_list,label_list,yes_cnt,no_cnt,rotationNum,imgDim):
@@ -107,7 +130,7 @@ def load_image_data(img,label,img_list,label_list,yes_cnt,no_cnt,rotationNum,img
 def read_data(labelPath,imgPath,imgDim):
     #  read the labels from a csv file and read the corresponding images
 
-    rotationNum = 3 # 30 degree as a step
+    rotationNum = 6 # 30 degree as a step
 
     labelFile = pd.DataFrame(pd.read_csv(labelPath+'Labels-update_2_rm_Inference.csv'))
     n,c = labelFile.shape
