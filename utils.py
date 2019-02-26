@@ -107,7 +107,9 @@ def myPreprocessing(img,tar_dim):
     # plt.figure(5)
     # plt.imshow(img_norm_u8*opening)
     # plt.show()  
-    img_out = img_to_array(img_norm_f32 * np.float32(bin_mask))
+
+    # img_out = img_to_array(img_norm_f32 * np.float32(bin_mask))
+    img_out = img_to_array(img_norm_f32)
     return img_out
 
 def load_image_data(img,label,img_list,label_list,yes_cnt,no_cnt,rotationNum,imgDim):

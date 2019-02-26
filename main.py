@@ -1,6 +1,6 @@
 from utils import read_data,read_inference_data,exists_or_mkdir
 from keras_preprocessing.image import ImageDataGenerator
-from model import createModel, createModel_AlexNet, createModel_ResNet, createModel_ResNet18
+from model import createModel, createModel_AlexNet, createModel_ResNet, createModel_ResNet18, createModel_DensNet
 import argparse
 import os
 import matplotlib.pyplot as plt
@@ -27,7 +27,7 @@ exists_or_mkdir(checkpointPath)
 tfbdPath = './save/tensorboard/'
 exists_or_mkdir(tfbdPath)
 
-imgDim = (256,256,1)
+imgDim = (224,224,1)
 classNum = 2
 batchSize = 32
 epochsnum = 200
@@ -39,10 +39,11 @@ def train():
         height_shift_range=0.1, shear_range=0, zoom_range=0.2,
         horizontal_flip=True, vertical_flip=True)
 
-	model = createModel(*imgDim,classNum)
-	# model = createModel_AlexNet(*imgDim,classNum)
-	# model = createModel_ResNet(*imgDim,classNum)
-	# model = createModel_ResNet18(*imgDim,classNum)
+	# model = createModel(*imgDim,classNum)  #256
+	# model = createModel_AlexNet(*imgDim,classNum) #227
+	# model = createModel_ResNet(*imgDim,classNum)  #227
+	# model = createModel_ResNet18(*imgDim,classNum)  #229
+	model = createModel_DensNet(*imgDim,classNum)  #224
 	
 	opt = Adam(lr=INIT_LR,decay=INIT_LR / epochsnum)
 	# opt = Adam(lr=INIT_LR)

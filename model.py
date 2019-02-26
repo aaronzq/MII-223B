@@ -4,6 +4,7 @@ from keras import backend as K
 from keras import Model
 from keras.initializers import glorot_uniform
 from keras.applications.resnet50 import ResNet50
+from keras.applications.densenet import DenseNet121
 
 def createModel(row,col,depth,classes):
     model = Sequential()
@@ -91,6 +92,23 @@ def createModel_AlexNet(row,col,depth,classes):
     return model
 
 
+def createModel_DensNet(row,col,depth,classes):
+    model = Sequential()
+    inputShape = (row, col, depth)
+
+	# if we are using "channels first", update the input shape
+    if K.image_data_format() == "channels_first":
+        inputShape = (depth, height, width)
+    print(K.image_data_format())
+    base_model = DenseNet121(weights=None, include_top=False, input_shape=inputShape)
+    x = base_model.output
+    x = GlobalAveragePooling2D()(x)
+    x = Dropout(0.5)(x)
+    x = Dense(classes)(x)
+    predictions = Activation('softmax')(x)
+	
+    return Model(inputs=base_model.input,outputs=predictions)      
+
 def createModel_ResNet(row,col,depth,classes):
 	model = Sequential()
 	inputShape = (row, col, depth)
@@ -98,7 +116,7 @@ def createModel_ResNet(row,col,depth,classes):
 	# if we are using "channels first", update the input shape
 	if K.image_data_format() == "channels_first":
 		inputShape = (depth, height, width)
-	 # print(K.image_data_format())
+    # print(K.image_data_format())
 	base_model = ResNet50(weights=None, include_top=False, input_shape=inputShape)
 	x = base_model.output
 	x = GlobalAveragePooling2D()(x)
@@ -270,7 +288,8 @@ def createModel_ResNet18(row,col,depth,classes):
 
 
 if __name__ == "__main__":
-    model = createModel(256,256,3,2)
+    # model = createModel(256,256,3,2)
     # model = createModel_AlexNet(227,227,1,2)
     # model = createModel_ResNet18(229,229,1,2)
+    model = createModel_DensNet(224,224,1,2)
     print(model.summary())
