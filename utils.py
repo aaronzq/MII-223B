@@ -67,8 +67,37 @@ def rotate_bound(image, angle):
     # perform the actual rotation and return the image
     return cv2.warpAffine(image, M, (nW, nH))
 
-    
-def myPreprocessing(img,tar_dim):
+def crop_patches(img, patch_x, patch_y, o_ratio):
+    (img_row,img_col) = img.shape
+    overlap_x = int(patch_x * o_ratio)
+    overlap_y = int(patch_y * o_ratio)
+
+    n_x = int((img_col - patch_x) / (patch_x - overlap_x))
+    n_y = int((img_row - patch_y) / (patch_y - overlap_y))
+    n_tot = n_x*n_y
+
+    out = np.zeros((patch_x,patch_y,n_tot),np.float32)
+    out_sort = np.zeros((patch_x,patch_y,n_tot),np.float32)
+    mean_list = []
+    chan = 0
+    for i in range(n_x):
+        for j in range(n_y):
+            patch = img[ j*(patch_y-overlap_y) : j*(patch_y-overlap_y) + patch_y , i*(patch_x-overlap_x) : i*(patch_x-overlap_x) + patch_x ]
+            out[:,:,chan] = patch
+            mean_list.append(np.mean(patch))
+            chan+=1
+            # plt.figure()
+            # plt.imshow(patch)
+            # plt.show()
+            # pass
+    mean_list_i = list(enumerate(mean_list))
+    mean_list_i.sort(key = lambda m: m[1], reverse = True)
+    sort_ind = [i for i,j in mean_list_i]
+    out_sort = out[:,:,sort_ind]
+    return np.array(out_sort)
+
+
+def myPreprocessing(img,tar_dim,patch_x,patch_y,o_ratio):
     ## several pre-processing steps
     base_r = 0.3
     kernel = np.ones((6,6),np.uint8)
@@ -78,14 +107,18 @@ def myPreprocessing(img,tar_dim):
     img_norm_u8 = normalize_u8(img_ds)
     img_norm_f32 = normalize(img_ds)
 
-
-    t, img_bin_base = cv2.threshold(img_norm_u8, round(base_r*255), 255, cv2.THRESH_BINARY)
-    base_mask = np.uint8(img_bin_base > 125)
+    img_in_patch = crop_patches(img_norm_f32,patch_x,patch_y,o_ratio)
 
 
-    feature_bin = cv2.GaussianBlur(img_norm_u8*base_mask,(13,13),0)
-    feature_bin = cv2.adaptiveThreshold(feature_bin, 255 , cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,17,0)
-    bin_mask = np.uint8(feature_bin > 125)
+    # t, img_bin_base = cv2.threshold(img_norm_u8, round(base_r*255), 255, cv2.THRESH_BINARY)
+    # base_mask = np.uint8(img_bin_base > 125)
+
+
+    # feature_bin = cv2.GaussianBlur(img_norm_u8*base_mask,(13,13),0)
+    # feature_bin = cv2.adaptiveThreshold(feature_bin, 255 , cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,17,0)
+    # bin_mask = np.uint8(feature_bin > 125)
+    
+    ############################# not applicable, just for fun ###################################################
     # opening = cv2.morphologyEx(bin_mask, cv2.MORPH_GRADIENT, kernel)
     # erosion = cv2.erode(bin_mask,kernel,iterations = 1)
     
@@ -94,29 +127,36 @@ def myPreprocessing(img,tar_dim):
     # feature_bin = np.float32(feature_bin)
 
     # img_out = np.dstack((img_norm_u8,feature_bin,feature_edge))
+    ##############################################################################################################
 
+    ########################################## for testing the filter above ######################################
     # plt.axis('off')
     # plt.figure(1)
-    # plt.imshow(img_out[:,:,0])
+    # plt.imshow(img_norm_u8)
     # plt.figure(2)
-    # plt.imshow(img_out[:,:,1])
+    # plt.imshow(img_bin_base)
     # plt.figure(3)
-    # plt.imshow(img_out[:,:,2])
+    # plt.imshow(feature_bin)
     # plt.figure(4)
     # plt.imshow(img_norm_u8*bin_mask)
     # plt.figure(5)
     # plt.imshow(img_norm_u8*opening)
-    # plt.show()  
-    img_out = img_to_array(img_norm_f32 * np.float32(bin_mask))
+    # plt.show() 
+    ##############################################################################################################
+
+
+    # img_out = img_to_array(img_norm_f32 * np.float32(bin_mask))
+
+    img_out = img_to_array(img_in_patch)
     return img_out
 
-def load_image_data(img,label,img_list,label_list,yes_cnt,no_cnt,rotationNum,imgDim):
+def load_image_data(img,label,img_list,label_list,yes_cnt,no_cnt,rotationNum,imgDim,patch_x,patch_y,o_ratio):
     ## augment the data with rotation and expand the labels correspondingly
 
     angleInc = 180 // rotationNum
     for ang in range(0,180,angleInc):
         imgRot = rotate_bound(img, ang)
-        imgPre = myPreprocessing(imgRot,imgDim)
+        imgPre = myPreprocessing(imgRot,imgDim,patch_x,patch_y,o_ratio)
         img_list.append(imgPre)
         if label == 'no':
             label_list.append(0)
@@ -127,7 +167,7 @@ def load_image_data(img,label,img_list,label_list,yes_cnt,no_cnt,rotationNum,img
     return yes_cnt,no_cnt
 
 
-def read_data(labelPath,imgPath,imgDim):
+def read_data(labelPath,imgPath,imgDim,patch_x,patch_y,o_ratio):
     #  read the labels from a csv file and read the corresponding images
 
     rotationNum = 6 # 30 degree as a step
@@ -142,7 +182,7 @@ def read_data(labelPath,imgPath,imgDim):
     for i in range(n):
         ind,imgName,labelName = labelFile.loc[i]
         img = cv2.imread(imgPath+imgName,cv2.IMREAD_GRAYSCALE)
-        yes,no = load_image_data(img,labelName,img_list,label_list,yes,no,rotationNum,imgDim)
+        yes,no = load_image_data(img,labelName,img_list,label_list,yes,no,rotationNum,imgDim,patch_x,patch_y,o_ratio)
 
     ##### Transform data into network-compatible format
     data = np.array(img_list, dtype='float')
@@ -221,9 +261,13 @@ if __name__ == "__main__":
     savePath = '../../NeedleImages/Recategorized/'
     infPath = '../../NeedleImages/Recategorized/Inference/'
 
-    imgDim=(256,256,3)
+    imgDim=(256,256,1)
+    patch_x = 64
+    patch_y = 64
+    o_ratio = 0
 
-    train_data,train_label,test_data,test_label = read_data(labelPath,imgPath,imgDim)
+
+    train_data,train_label,test_data,test_label = read_data(labelPath,imgPath,imgDim,patch_x,patch_y,o_ratio)
     infer_data = read_inference_data(infPath,imgDim)
     
     print(train_label[0:10])

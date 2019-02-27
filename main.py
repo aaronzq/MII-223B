@@ -28,20 +28,34 @@ tfbdPath = './save/tensorboard/'
 exists_or_mkdir(tfbdPath)
 
 imgDim = (256,256,1)
+
+patch_x = 64
+patch_y = 64
+o_ratio = 0
+
+##########################################################
+overlap_x = int(patch_x * o_ratio)
+overlap_y = int(patch_y * o_ratio)
+n_x = int((imgDim[1] - patch_x) / (patch_x - overlap_x))
+n_y = int((imgDim[0] - patch_y) / (patch_y - overlap_y))
+n_tot = n_x*n_y
+patchDim = (patch_y,patch_x,n_tot)
+##########################################################
+
 classNum = 2
 batchSize = 32
 epochsnum = 200
-INIT_LR = 6e-4
+INIT_LR = 1e-4
 
 def train():
-	train_data,train_label,test_data,test_label = read_data(labelPath,imgPath,imgDim)
-	aug = ImageDataGenerator(rotation_range=20,width_shift_range=0.1,
-        height_shift_range=0.1, shear_range=0, zoom_range=0.2,
+	train_data,train_label,test_data,test_label = read_data(labelPath,imgPath,imgDim,patch_x,patch_y,o_ratio)
+	aug = ImageDataGenerator(rotation_range=0,width_shift_range=0.1,
+        height_shift_range=0.1, shear_range=0, zoom_range=0,
         horizontal_flip=True, vertical_flip=True)
 
-	model = createModel(*imgDim,classNum)
-	# model = createModel_AlexNet(*imgDim,classNum)
-	# model = createModel_ResNet(*imgDim,classNum)
+	model = createModel(*patchDim,classNum)					#256
+	# model = createModel_AlexNet(*imgDim,classNum)			#229
+	# model = createModel_ResNet(*imgDim,classNum)			#227
 	# model = createModel_ResNet18(*imgDim,classNum)
 	
 	opt = Adam(lr=INIT_LR,decay=INIT_LR / epochsnum)

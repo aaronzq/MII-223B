@@ -270,7 +270,7 @@ def createModel_ResNet18(row,col,depth,classes):
 
 
 if __name__ == "__main__":
-    model = createModel(256,256,3,2)
+    model = createModel(64,64,36,2)
     # model = createModel_AlexNet(227,227,1,2)
     # model = createModel_ResNet18(229,229,1,2)
     print(model.summary())
