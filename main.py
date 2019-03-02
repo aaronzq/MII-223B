@@ -55,8 +55,8 @@ def train():
 	tfbd = TensorBoard(log_dir=tfbdPath, histogram_freq=0,write_graph=True, write_images=True)
 
 	# checkpoint
-	ckptName = 'checkpoint.{epoch:02d}-{loss:.2f}-{val_loss:.2f}.model'
-	checkpoint = ModelCheckpoint(checkpointPath+ckptName, monitor='val_loss', verbose=1, save_best_only=True, mode='min', period=4)
+	ckptName = 'checkpoint{epoch:02d}-loss{loss:.2f}-val_loss{val_loss:.2f}-acc{categorical_accuracy:.2f}-val_acc{val_categorical_accuracy:.2f}.model'
+	checkpoint = ModelCheckpoint(checkpointPath+ckptName, monitor='val_categorical_accuracy', verbose=1, save_best_only=True, mode='max', period=4)
 	
 	callbacks_list = [checkpoint,tfbd]
 
