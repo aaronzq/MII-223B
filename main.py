@@ -8,6 +8,7 @@ import numpy as np
 from keras.optimizers import Adam
 from keras.models import load_model
 from keras.callbacks import ModelCheckpoint, TensorBoard
+import cv2
 
 
 # construct the argument parse and parse the arguments
@@ -20,8 +21,10 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 labelPath = '../../NeedleImages/Recategorized/'
 imgPath = '../../NeedleImages/Recategorized/'
 infPath = '../../NeedleImages/Recategorized/Inference/'
-labelPath_seg = '../../NeedleImages/Recategorized/yesNeedleMask'
-imgPath_seg = '../../NeedleImages/Recategorized/yesNeedle'
+labelPath_seg = '../../NeedleImages/Recategorized/yesNeedleMask/'
+imgPath_seg = '../../NeedleImages/Recategorized/yesNeedle/'
+infPath_seg = '../../NeedleImages/Recategorized/Inference_seg/input/'
+infPath_seg_out = '../../NeedleImages/Recategorized/Inference_seg/output/'
 savePath = './save/'
 exists_or_mkdir(savePath)
 checkpointPath = './save/checkpoint/'
@@ -145,12 +148,25 @@ def train_seg():
 	plt.legend(loc="lower left")
 	plt.savefig(savePath+'plot.png')	
 
+def infer_seg():
+	imgDim = (256,256,1)
+
+	model = load_model(savePath+'needle_seg.model')
+	imgInfer = read_inference_data(infPath_seg,imgDim)
+	result = model.predict(imgInfer)
+	print(result.shape)
+	i=0
+	for mask in result:
+		output = np.uint8(255*mask[:,:,0])
+		cv2.imwrite(infPath_seg_out+str(i)+'.tif',output)
+		i+=1
+
 
 if __name__ == "__main__":
 	if args['model'] == 'train':
 		# train()
 		train_seg()
 	elif args['model'] == 'infer':
-		infer()
+		infer_seg()
 	else:
 		print('Input correct parameters: train or infer')
