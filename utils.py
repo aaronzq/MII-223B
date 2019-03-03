@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import cv2 
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split 
 from skimage.exposure import histogram
@@ -161,7 +163,47 @@ def read_data(labelPath,imgPath,imgDim):
     
     return train_data,train_label,test_data,test_label
 
+def read_data_seg(labelPath,imgPath,imgDim):
+    # read the mask and corresponding images
 
+    rotationNum = 6
+    angleInc = 180 // rotationNum
+
+    labelFile = [f for f in listdir(labelPath) if isfile(join(labelPath, f))]
+    imgFile = [f for f in listdir(imgPath) if isfile(join(imgPath, f))]
+
+    labelList = list()
+    imgList = list()
+
+    for label_f in labelFile:
+        label = cv2.imread(join(labelPath,label_f), cv2.IMREAD_GRAYSCALE)
+            
+        for ang in range(0,180,angleInc):
+            labelRot = rotate_bound(label, ang)
+            labelPre = myPreprocessing(labelRot,imgDim)
+            labelList.append(labelPre)
+
+    for img_f in imgFile:
+        img = cv2.imread(join(imgPath,img_f), cv2.IMREAD_GRAYSCALE)
+
+        for ang in range(0,180,angleInc):
+            imgRot = rotate_bound(img, ang)
+            imgPre = myPreprocessing(imgRot,imgDim)
+            imgList.append(imgPre)
+
+    labelout =  np.array(labelList)
+    imgout = np.array(imgList)
+    
+    (train_data, test_data, train_label, test_label) = train_test_split(imgout,
+            labelout, test_size=0.2, random_state=42)
+
+    print(' {} Image and {} Mask in total'.format(len(imgList), len(labelList)))
+    print(train_data.shape)
+    print(train_label.shape)
+
+    return train_data,train_label,test_data,test_label
+
+        
 def read_inference_data(imgPath,imgDim):
     # read the all images under the imgPath and use a trained model to infer
     files_to_infer = [f for f in listdir(imgPath) if isfile(join(imgPath, f))]
@@ -184,7 +226,7 @@ def save_data_folders(labelPath,imgPath,noNeedle,yesNeedle):
     #  read the labels from a csv file and read the corresponding images
     #  save them in different folders
 
-    labelFile = pd.DataFrame(pd.read_csv(labelPath+'Labels.csv'))
+    labelFile = pd.DataFrame(pd.read_csv(labelPath+'Labels-update_2_rm_Inference.csv'))
     n,c = labelFile.shape
     for i in range(n):
         ind,imgName,labelName = labelFile.loc[i]
@@ -220,65 +262,21 @@ if __name__ == "__main__":
 
     labelPath = '../../NeedleImages/Recategorized/'
     imgPath = '../../NeedleImages/Recategorized/'
-    savePath = '../../NeedleImages/Recategorized/'
+
+    labelPath_seg = '../../NeedleImages/Recategorized/yesNeedleMask'
+    imgPath_seg = '../../NeedleImages/Recategorized/yesNeedle'
+
     infPath = '../../NeedleImages/Recategorized/Inference/'
 
-    imgDim=(256,256,3)
 
-    train_data,train_label,test_data,test_label = read_data(labelPath,imgPath,imgDim)
-    infer_data = read_inference_data(infPath,imgDim)
+    imgDim=(256,256,1)
+
+    read_data_seg(labelPath_seg,imgPath_seg,imgDim)
+
+    # train_data,train_label,test_data,test_label = read_data(labelPath,imgPath,imgDim)
+    # infer_data = read_inference_data(infPath,imgDim)
     
-    print(train_label[0:10])
+    # print(train_label[0:10])
 
-    # test = train_data[8,:,:,0]
-    # hist, hist_centers = histogram(test)
-
-    # test2 = train_data[9,:,:,0]
-    # hist2, hist_centers2 = histogram(test2)
-    # print('++++++')
-    # print(hist)
-    # print('++++++')
-    # print(hist_centers)
-    # testbin = cv2.adaptiveThreshold(test,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,12,3)
-    # testedge = cv2.Canny(testbin)
-
-
-    # plt.axis('off')
-    # plt.figure(1)
-    # plt.imshow(test)
-    # plt.figure(2)
-    # plt.plot(hist_centers,hist,lw=2)
-    # plt.figure(3)
-    # plt.imshow(test2)
-    # plt.figure(4)
-    # plt.plot(hist_centers2,hist2,lw=2)
-    # plt.figure(5)
-    # plt.imshow(testbin)
-    # plt.figure(6)
-    # plt.imshow(testedge)
-    # plt.show()
-
-
-
-
-    # pass
-    # imgName = '18954.jpg'
-    # im_test = cv2.imread(imgPath+imgName,cv2.IMREAD_GRAYSCALE)
-    # img = cv2.resize(im_test, (256,256))
-    # # img = normalize(img)
-    # imgh = cv2.GaussianBlur(img,(5,5),1)
-    # imgl = cv2.GaussianBlur(img,(15,15),5)
-    # img = np.abs(imgh-imgl)
-    # imgbin = cv2.adaptiveThreshold(img, 255 , cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,17,0)
-    # imgedge = cv2.Canny(imgbin,25,100)
-
-    # plt.axis('off')
-    # plt.figure(1)
-    # plt.imshow(img)
-    # plt.figure(2)
-    # plt.imshow(imgbin)
-    # plt.figure(3)
-    # plt.imshow(imgedge)
-    # plt.show()
     # save_data_folders(labelPath,imgPath,noNeedle,yesNeedle)
     # create_label_file(No_Needle,Yes_Needle,savePath)
