@@ -5,10 +5,10 @@ import argparse
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+import cv2
 from keras.optimizers import Adam
 from keras.models import load_model
 from keras.callbacks import ModelCheckpoint, TensorBoard
-import cv2
 
 
 # construct the argument parse and parse the arguments
@@ -106,8 +106,8 @@ def infer():
 def train_seg():
 	imgDim = (256,256,1)
 	batchSize = 32
-	epochsnum = 200
-	INIT_LR = 6e-4
+	epochsnum = 50
+	INIT_LR = 3e-4
 
 	train_data,train_label,test_data,test_label = read_data_seg(labelPath_seg,imgPath_seg,imgDim)
 
@@ -124,7 +124,7 @@ def train_seg():
 
 	# checkpoint
 	ckptName = 'checkpoint{epoch:02d}-loss{loss:.2f}-val_loss{val_loss:.2f}-acc{acc:.2f}-val_acc{val_acc:.2f}.model'
-	checkpoint = ModelCheckpoint(checkpointPath+ckptName, monitor='val_acc', verbose=1, save_best_only=True, mode='max', period=4)
+	checkpoint = ModelCheckpoint(checkpointPath+ckptName, monitor='val_acc', verbose=1, save_best_only=True, mode='max', period=1)
 	
 	callbacks_list = [checkpoint,tfbd]
 
@@ -157,7 +157,7 @@ def infer_seg():
 	print(result.shape)
 	i=0
 	for mask in result:
-		output = np.uint8(255*mask[:,:,0])
+		output = np.uint8(255*(1-mask[:,:,0]))
 		cv2.imwrite(infPath_seg_out+str(i)+'.tif',output)
 		i+=1
 
@@ -167,6 +167,7 @@ if __name__ == "__main__":
 		# train()
 		train_seg()
 	elif args['model'] == 'infer':
+		# infer()
 		infer_seg()
 	else:
 		print('Input correct parameters: train or infer')

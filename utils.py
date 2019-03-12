@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import cv2 
 import matplotlib
-matplotlib.use('TkAgg')
+#matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split 
 from skimage.exposure import histogram
@@ -136,7 +136,7 @@ def read_data(labelPath,imgPath,imgDim):
 
     rotationNum = 6 # 30 degree as a step
 
-    labelFile = pd.DataFrame(pd.read_csv(labelPath+'Labels-update_2_rm_Inference.csv'))
+    labelFile = pd.DataFrame(pd.read_csv(labelPath+'Labels-update_final_rm_Inference.csv'))
     n,c = labelFile.shape
     img_list=list()
     label_list=list()
@@ -213,7 +213,7 @@ def read_inference_data(imgPath,imgDim):
         im = myPreprocessing(im,imgDim)
         imgs_to_infer.append(im)
     return np.array(imgs_to_infer)
-
+    
 def exists_or_mkdir(path):
     # check if the folder exist, if not, create one
 
