@@ -1,4 +1,4 @@
-from utils import read_data,read_inference_data,exists_or_mkdir, read_data_seg
+from utils import read_data,read_inference_data,exists_or_mkdir, read_data_seg, read_inference_data_gt
 from keras_preprocessing.image import ImageDataGenerator
 from model import createModel, createModel_AlexNet, createModel_ResNet, createModel_ResNet18, createModel_DensNet, createModel_Unet
 import argparse
@@ -11,7 +11,7 @@ from keras.models import load_model
 from keras.callbacks import ModelCheckpoint, TensorBoard
 
 
-# construct the argument parse and parse the arguments
+construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model", required=True, help="train or infer")
 args = vars(ap.parse_args())
@@ -24,6 +24,7 @@ infPath = '../../NeedleImages/Recategorized/Inference/'
 labelPath_seg = '../../NeedleImages/Recategorized/yesNeedleMask/'
 imgPath_seg = '../../NeedleImages/Recategorized/yesNeedle/'
 infPath_seg = '../../NeedleImages/Recategorized/Inference_seg/input/'
+infGTPath_seg = '../../NeedleImages/Recategorized/Inference_seg/gt/'
 infPath_seg_out = '../../NeedleImages/Recategorized/Inference_seg/output/'
 savePath = './save/'
 exists_or_mkdir(savePath)
@@ -153,11 +154,18 @@ def infer_seg():
 
 	model = load_model(savePath+'needle_seg.model')
 	imgInfer = read_inference_data(infPath_seg,imgDim)
+	imgGT = read_inference_data_gt(infGTPath_seg,imgDim)
 	result = model.predict(imgInfer)
 	print(result.shape)
 	i=0
 	for mask in result:
 		output = np.uint8(255*(1-mask[:,:,0]))
+		gt_bin = (1-imgGT[i,:,:,0]) > 0.5
+		output_bin = (output>128)
+		positive = output_bin.sum()
+		true_positive = gt_bin*output_bin
+		true_positive = true_positive.sum()
+		print('Image {0:2d} ,Positive count: {1:4d} ,True-Positive Ratio: {2:7f} ,Odd Ratio: {3:7f}'.format(i,positive,true_positive/positive,(true_positive/positive)/(1-(true_positive/positive))))
 		cv2.imwrite(infPath_seg_out+str(i)+'.tif',output)
 		i+=1
 
@@ -171,3 +179,4 @@ if __name__ == "__main__":
 		infer_seg()
 	else:
 		print('Input correct parameters: train or infer')
+	# infer_seg()

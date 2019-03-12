@@ -213,7 +213,17 @@ def read_inference_data(imgPath,imgDim):
         im = myPreprocessing(im,imgDim)
         imgs_to_infer.append(im)
     return np.array(imgs_to_infer)
-    
+
+def read_inference_data_gt(imgPath, imgDim):
+    # read the all ground truth images under the imgPath 
+    files_gt = [f for f in listdir(imgPath) if isfile(join(imgPath, f))]
+    imgs_gt = list()
+    for f in files_gt:
+        im = cv2.imread(join(imgPath, f),cv2.IMREAD_GRAYSCALE)
+        im = myPreprocessing(im,imgDim)
+        imgs_gt.append(im)
+    return np.array(imgs_gt) 
+
 def exists_or_mkdir(path):
     # check if the folder exist, if not, create one
 
