@@ -11,7 +11,7 @@ from keras.models import load_model
 from keras.callbacks import ModelCheckpoint, TensorBoard
 
 
-construct the argument parse and parse the arguments
+#construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model", required=True, help="train or infer")
 args = vars(ap.parse_args())
