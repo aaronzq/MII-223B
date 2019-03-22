@@ -75,7 +75,7 @@ def myPreprocessing(img,tar_dim):
     base_r = 0.3
     kernel = np.ones((6,6),np.uint8)
 
-    img_ds = cv2.resize(img, (tar_dim[0],tar_dim[1]))
+    img_ds = cv2.resize(img, (tar_dim[0],tar_dim[1]), interpolation=cv2.INTER_NEAREST)
 
     img_norm_u8 = normalize_u8(img_ds)
     img_norm_f32 = normalize(img_ds)

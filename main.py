@@ -11,7 +11,7 @@ from keras.models import load_model
 from keras.callbacks import ModelCheckpoint, TensorBoard
 
 
-#construct the argument parse and parse the arguments
+# construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model", required=True, help="train or infer")
 args = vars(ap.parse_args())
@@ -147,7 +147,26 @@ def train_seg():
 	plt.xlabel("Epoch #")
 	plt.ylabel("Loss/Accuracy")
 	plt.legend(loc="lower left")
-	plt.savefig(savePath+'plot.png')	
+	plt.savefig(savePath+'plot.png')
+
+	plt.figure()
+	plt.plot(np.arange(0, N), H.history["loss"], label="train_loss")
+	plt.plot(np.arange(0, N), H.history["val_loss"], label="val_loss")
+	plt.title('Loss Unet')
+	plt.xlabel("Epoch #")
+	plt.ylabel("Loss")
+	plt.legend(loc="upper right")
+	plt.savefig(savePath+'plot_loss.png')
+
+	plt.figure()
+	plt.plot(np.arange(0, N), H.history["acc"], label="train_acc")
+	plt.plot(np.arange(0, N), H.history["val_acc"], label="val_acc")
+	plt.title('Accuracy Unet')
+	plt.xlabel("Epoch #")
+	plt.ylabel("Accuracy")
+	plt.legend(loc="lower right")
+	plt.savefig(savePath+'plot_accuracy.png')
+	
 
 def infer_seg():
 	imgDim = (256,256,1)
@@ -179,4 +198,3 @@ if __name__ == "__main__":
 		infer_seg()
 	else:
 		print('Input correct parameters: train or infer')
-	# infer_seg()
